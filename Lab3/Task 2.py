@@ -1,11 +1,10 @@
 def get_count_char(str_):
-    str_ = "".join(sorted(str_.lower().split()))
+    str_ = "".join(str_.lower().split())
     dict_elem = {}
     for elem in str_:
-        if elem.isalpha():
+        if elem.isalpha() and not dict_elem.get(elem):
             dict_elem[elem] = str_.count(elem)
     return dict_elem
-
 
 def get_percentage(dict_element):
     for i in dict_element:
@@ -21,4 +20,3 @@ main_str = """
 count_char = get_count_char(main_str)
 print(count_char)
 percentage = get_percentage(count_char)
-print(percentage)
