@@ -1,48 +1,59 @@
 FIRST_PLAYER_SYMBOL = "X"
 SECOND_PLAYER_SYMBOL = "0"
-SIZE = 3
-EMPTY_CELL = "empty"
+EMPTY_CELL = " "
+SIZE = int(input("Введите размер поля: "))
 
 def main():
     field = init_field(SIZE)
-    print_field(field) # рисуем поле
+    print_field(field)  # рисуем поле
+    game(field, FIRST_PLAYER_SYMBOL, SIZE)  # ну или тот символ, что выберет пользователь
 
-    while True: # цикл продолжается пока не определен победитель
-        player_step(field, FIRST_PLAYER_SYMBOL) # ходит первый игрок
-        if is_win(field): # проверяем есть ли победитель
-            print("победил игрок №1 (X)")
-            break
-        print_field(field) # рисуем поле после каждого хода
-        if not has_empty_cell(field): # проверяем остались ли свободные ячейки
-            print("Ничья")
-            break
 
-        enemy_step(field, SECOND_PLAYER_SYMBOL)
-        if is_win(field):
-            print("Победил игрок №2 (0)")
-            break
+def game(field, player, size):
+    win_combination = get_win_combinations(size)
+    current_player = player
+    while True:  # цикл продолжается пока не определен победитель
+        point = player_step(field)  # ходит игрок
+        field[point[0]][point[1]] = current_player
         print_field(field)
-        if not has_empty_cell(field):
-            print("Ничья")
+        if is_win(field, win_combination, size):  # проверяем есть ли победитель
+            print(f"\t  Победил игрок - ({current_player})")
+            print("                ⠀  ⠀⠀⠀／＞　 フ\n \
+            　　　　　| 　_　 _|\n \
+            　 　　　／`ミ _x 彡\n \
+            　　 　 /　　　 　 |\n \
+            　　　 /　 ヽ　　 ﾉ\n \
+            　／￣|　　 |　|　|\n \
+            　| (￣ヽ＿_ヽ_)_)\n \
+            　＼二つ")
             break
+        if not has_empty_cell(field):  # проверяем остались ли свободные ячейки
+            print("\tНичья")
+            break
+        current_player = FIRST_PLAYER_SYMBOL if current_player == SECOND_PLAYER_SYMBOL else SECOND_PLAYER_SYMBOL
 
 
-def init_field(SIZE):
+def init_field(size):
     """Инициализируем поле"""
-    field = [[EMPTY_CELL] * SIZE for _ in range(SIZE)]
+    field = [[EMPTY_CELL] * size for _ in range(size)]
     return field
+
 
 def print_field(field):
     """Рисуем поле"""
-    field = [[EMPTY_CELL] * SIZE for _ in range(SIZE)]
+    sep = "- - " * SIZE
+    sep_size = sep + '- '
+    print(sep_size)
     for line in field:
         print("| ", end="")
         for cell in line:
-            print(f"{get_char(cell)} |", end=" ")
+            print(f"{cell} |", end=" ")
         print("")
+        print(sep_size)
 
-def player_step(field, player_symbol):
-    """Ход игрока №1"""
+
+def player_step(field):
+    """Ход игрока"""
     while True:
         try:
             x = int(input("Введите номер строки: "))
@@ -55,7 +66,7 @@ def player_step(field, player_symbol):
         try:
             y = int(input("Введите номер столбца: "))
         except ValueError:
-            print("Солбец введен некорректно. Попробуйте еще раз.")
+            print("Столбец введен некорректно. Попробуйте еще раз.")
             continue
         if not 1 <= y <= SIZE:
             print("Координата вне рамок поля. Попробуйте еще раз.")
@@ -65,13 +76,9 @@ def player_step(field, player_symbol):
         if current_cell != EMPTY_CELL:
             print("Координата занята")
             continue
-        cell_number = (x,y)
+        cell_number = (x - 1, y - 1)
         return cell_number
-        break
 
-def enemy_step(field, player_symbol):
-    """Ход игрока №2"""
-    player_step(field,player_symbol)
 
 def has_empty_cell(field):
     """Проверка есть ли еще пустые ячейки"""
@@ -81,7 +88,8 @@ def has_empty_cell(field):
                 return True
     return False
 
-def get_char (val):
+
+def get_char(val):
     """
     Функция определяет значение в поле после хода игрока
     """
@@ -92,27 +100,45 @@ def get_char (val):
         return "O"
     return EMPTY_CELL
 
+
 def get_cell(field, cell_number):
     """Получает ячейку из координат"""
-    current_row = field[x - 1]
-    current_cell_number = current_row[y - 1]
-    return current_cell_number
+    return field[cell_number[0] - 1][cell_number[1] - 1]
 
-def is_win(field):
+
+def get_win_combinations(size):  # создаёт индексы выгрышных комбинаций
+    diagonal1 = []
+    diagonal2 = []
+    rows = []
+    cols = []
+    for i in range(size):
+        tmp_row = []
+        tmp_col = []
+        for j in range(size):
+            tmp_row.append((i, j))
+            tmp_col.append((j, i))
+        rows.append(tmp_row)
+        cols.append(tmp_col)
+        diagonal1.append((i, i))
+        diagonal2.append((i, size - 1 - i))
+
+    return rows + cols + [diagonal1] + [diagonal2]
+
+
+def is_win(field, win_combination, size):
     """есть ли внутри поля выйгрышная комбинация"""
-    win_combination = [
-        [(0,0), (0,1), (0,2)],
-        [(1,0), (1,1), (1,2)],
-        [(2,0), (2,1), (2,2)],
-        [(0,0), (1,1), (2,2)],
-        [(0,2), (1,1), (2,0)]
-    ]
-
-# Не понимаю, как дописать функцию проверки выигрыша
-
-    if cell_1 == cell_2 == cell_3 != EMPTY_CELL:
-        return True
-    else:
-        return False
+    count = 1
+    for comb in win_combination:
+        current_symbol = field[comb[0][0]][comb[0][1]]
+        for i_row, i_col in comb[1:]:
+            if field[i_row][i_col] == current_symbol:
+                count += 1
+                if count == size and current_symbol != EMPTY_CELL:
+                    return True
+            else:
+                count = 1
+    return False
 
 
+if __name__ == "__main__":
+    main()
